@@ -2,6 +2,8 @@ name: ECR Setup
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-ecr-setup]
 
 jobs:
   ecr:
