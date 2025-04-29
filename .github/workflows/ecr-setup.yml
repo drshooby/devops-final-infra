@@ -8,14 +8,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source
+    - name: Checkout repo
       uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
+    - name: Configure AWS credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
         aws-region: us-west-2
 
     - name: Setup Terraform
@@ -25,22 +24,18 @@ jobs:
       run: |
         cd infra/00-ecr-setup
         terraform init -input=false
-      continue-on-error: false
 
     - name: Terraform Validate
       run: |
         cd infra/00-ecr-setup
         terraform validate
-      continue-on-error: false
 
     - name: Terraform Plan
       run: |
         cd infra/00-ecr-setup
         terraform plan -out=tfplan
-      continue-on-error: false
 
-    - name: Terraform Apply (ECR)
+    - name: Terraform Apply
       run: |
         cd infra/00-ecr-setup
-        terraform apply -input=false -auto-approve tfplan
-      continue-on-error: false
+        terraform apply -auto-approve tfplan
