@@ -46,5 +46,9 @@ jobs:
         cd infra/00-ecr-setup
         terraform apply -auto-approve tfplan || echo "Terraform apply failed, possibly because resources already exist."
 
-    - name: List existing ECR repositories
-      run: aws ecr describe-repositories
+    - name: Tell Source Ready To Go
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.PAT }}
+        repository: drshooby/devops-final-source
+        event-type: ready-to-build
