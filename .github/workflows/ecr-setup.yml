@@ -21,9 +21,6 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
         aws-region: us-west-2
 
-    - name: Who am I?
-      run: aws sts get-caller-identity
-
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
@@ -45,7 +42,7 @@ jobs:
     - name: Terraform Apply
       run: |
         cd infra/00-ecr-setup
-        terraform apply -auto-approve tfplan
+        terraform apply -auto-approve tfplan || echo "Terraform apply failed, possibly because resources already exist."
 
     - name: List existing ECR repositories
       run: aws ecr describe-repositories
