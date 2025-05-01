@@ -1,6 +1,7 @@
 name: QA
 
 on:
+  workflow_dispatch:
   repository_dispatch:
     types: [begin-qa]
 
