@@ -15,7 +15,7 @@ module "ecr" {
     rules = [
       {
         rulePriority = 1
-        description  = "Keep last 30 images"
+        description  = "Keep last 10 images"
         selection = {
           tagStatus     = "tagged"
           tagPrefixList = ["v"]
