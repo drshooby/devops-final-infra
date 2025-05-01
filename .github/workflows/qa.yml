@@ -72,3 +72,9 @@ jobs:
         run: |
           cd infra/01-run-qa/terraform
           terraform destroy -auto-approve
+
+      - name: Terraform Destroy on Failure
+        if: failure()
+        run: |
+          cd infra/01-run-qa/terraform
+          terraform destroy -auto-approve
