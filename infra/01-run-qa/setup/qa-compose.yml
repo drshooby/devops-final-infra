@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: photo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: qa
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: qadb
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "qadb" ]
+      interval: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./qa/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - photo-network
+
+  email-service:
+    image: email-service  # Already pulled via pull_images.sh
+    container_name: email-service
+    ports:
+      - "8000:8000"
+    environment:
+      SMTP_HOST: qa-not-tested
+      SMTP_PORT: 543
+      SMTP_USERNAME: qa-not-tested
+      SMTP_PASSWORD: qa-not-tested
+      FROM_EMAIL: qa-not-tested
+    networks:
+      - photo-network
+
+  list-service:
+    image: list-service
+    container_name: list-service
+    ports:
+      - "8001:8001"
+    environment:
+      POSTGRES_URL: postgresql+asyncpg://qa:password@photo-postgres:5432/qadb
+      ENVIRONMENT: qa
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - photo-network
+
+  metric-service:
+    image: metric-service
+    container_name: metric-service
+    ports:
+      - "8002:8002"
+    environment:
+      POSTGRES_URL: postgresql+asyncpg://qa:password@photo-postgres:5432/qadb
+      ENVIRONMENT: qa
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - photo-network
+
+  web:
+    image: frontend
+    container_name: photo-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - list-service
+      - email-service
+      - metric-service
+    networks:
+      - photo-network
+
+volumes:
+  postgres_data:
+
+networks:
+  photo-network:
+    driver: bridge

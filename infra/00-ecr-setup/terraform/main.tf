@@ -20,7 +20,7 @@ module "ecr" {
           tagStatus     = "tagged"
           tagPrefixList = ["v"]
           countType     = "imageCountMoreThan"
-          countNumber   = 30
+          countNumber   = 10
         }
         action = {
           type = "expire"

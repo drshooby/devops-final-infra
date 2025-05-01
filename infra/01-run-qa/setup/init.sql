@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS photos CASCADE;
+
+CREATE TABLE photos (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);

@@ -28,22 +28,22 @@ jobs:
 
     - name: Terraform Init
       run: |
-        cd infra/00-ecr-setup
+        cd infra/00-ecr-setup/terraform
         terraform init -input=false
 
     - name: Terraform Validate
       run: |
-        cd infra/00-ecr-setup
+        cd infra/00-ecr-setup/terraform
         terraform validate
 
     - name: Terraform Plan
       run: |
-        cd infra/00-ecr-setup
+        cd infra/00-ecr-setup/terraform
         terraform plan -out=tfplan
 
     - name: Terraform Apply
       run: |
-        cd infra/00-ecr-setup
+        cd infra/00-ecr-setup/terraform
         terraform apply -auto-approve tfplan || echo "Terraform apply failed, possibly because resources already exist."
 
     - name: Tell Source Ready To Go
