@@ -10,8 +10,8 @@ if [ ! -d "$SOURCE_DIR" ]; then
   exit 1
 fi
 
-echo "🚀 Uploading all files from '$SOURCE_DIR/' to s3://$BUCKET_NAME/scripts/"
+echo "🚀 Uploading all files from '$SOURCE_DIR/' to s3://$BUCKET_NAME/qa/"
 
-aws s3 cp "$SOURCE_DIR" "s3://$BUCKET_NAME/qa-setup/" --recursive
+aws s3 cp "$SOURCE_DIR" "s3://$BUCKET_NAME/qa/" --recursive
 
 echo "✅ Upload complete."
