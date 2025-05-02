@@ -7,7 +7,8 @@ REGION="us-east-1"
 
 echo "🔄 Waiting for EC2 instance $INSTANCE_ID to become SSM-managed..."
 
-for attempt in {1..20}; do
+attempt=1
+while true; do
   STATUS=$(aws ssm describe-instance-information \
     --region "$REGION" \
     --query "InstanceInformationList[?InstanceId=='$INSTANCE_ID'].PingStatus" \
@@ -18,9 +19,7 @@ for attempt in {1..20}; do
     exit 0
   fi
 
-  echo "⏳ SSM status: $STATUS. Waiting 7s..."
+  echo "⏳ Attempt $attempt: SSM status: $STATUS. Waiting 7s..."
   sleep 7
+  ((attempt++))
 done
-
-echo "❌ Instance $INSTANCE_ID did not become SSM-ready in time."
-exit 1
