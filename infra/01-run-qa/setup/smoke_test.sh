@@ -1,12 +1,28 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
+echo "🧪 Running smoke tests..."
 echo "🔍 Checking service health endpoints..."
 
-curl -fs http://localhost:8000/api/email/health && echo "✅ email-service is up" || echo "❌ email-service failed"
-curl -fs http://localhost:8001/api/list/health && echo "✅ list-service is up" || echo "❌ list-service failed"
-curl -fs http://localhost:8002/api/metric/health && echo "✅ metric-service is up" || echo "❌ metric-service failed"
-curl -fs http://localhost:8080 && echo "✅ web is up" || echo "❌ web failed"
+check_service() {
+  local name=$1
+  local url=$2
+  local expected=$3
 
-echo "✅ Health check complete."
+  response=$(curl -fs "$url" || true)
+  if [[ "$response" == *"$expected"* ]]; then
+    echo "✅ $name is up"
+  else
+    echo "❌ $name failed"
+    echo "$response"
+    exit 1
+  fi
+}
+
+check_service "email-service"  "http://localhost:8000/api/email/health"  "Hello"
+check_service "list-service"   "http://localhost:8001/api/list/health"   "Hello"
+check_service "metric-service" "http://localhost:8002/api/metrics/health" "Hello"
+check_service "web"            "http://localhost:8080"                   "<title>Photo App</title>"
+
+echo "✅ Smoke tests complete."

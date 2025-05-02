@@ -15,6 +15,7 @@ COMMAND_ID=$(aws ssm send-command \
   --region "$REGION" \
   --parameters 'commands=[
     "echo 📥 Downloading QA files from S3...",
+    "export PATH=/home/ssm-user/.docker/cli-plugins:$PATH",
     "aws s3 cp s3://qa-bucket-ds-final-2025/qa ./qa --recursive --region us-east-1",
     "chmod +x ./qa/*.sh",
     "./qa/qa_run_all.sh"

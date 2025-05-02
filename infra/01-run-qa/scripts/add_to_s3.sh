@@ -3,7 +3,7 @@
 set -euo pipefail
 
 BUCKET_NAME="qa-bucket-ds-final-2025"
-SOURCE_DIR="./infra/01-run-qa/setup"
+SOURCE_DIR="./infra/01-run-qa/setup" # local -> "../setup"
 
 if [ ! -d "$SOURCE_DIR" ]; then
   echo "❌ Directory '$SOURCE_DIR' does not exist."
