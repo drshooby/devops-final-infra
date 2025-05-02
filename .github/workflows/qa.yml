@@ -68,13 +68,7 @@ jobs:
           ./infra/01-run-qa/scripts/send_qa_commands.sh ${{ env.QA_INSTANCE_ID }}
 
       - name: Terraform Destroy QA Infra
-        #if: always()
-        run: |
-          cd infra/01-run-qa/terraform
-          terraform destroy -auto-approve
-
-      - name: Terraform Destroy on Failure
-        if: failure()
+        if: always()
         run: |
           cd infra/01-run-qa/terraform
           terraform destroy -auto-approve
