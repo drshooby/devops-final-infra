@@ -11,7 +11,7 @@ attempt=1
 while true; do
   STATUS=$(aws ssm describe-instance-information \
     --region "$REGION" \
-    --query "InstanceInformationList[?InstanceId=='$INSTANCE_ID'].PingStatus" \
+    --query "InstanceInformationList[?InstanceId=='${INSTANCE_ID}'].PingStatus | [0]" \
     --output text 2>/dev/null || echo "none")
 
   if [[ "$STATUS" == "Online" ]]; then
