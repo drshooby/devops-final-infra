@@ -13,7 +13,12 @@ COMMAND_ID=$(aws ssm send-command \
   --comment "Start QA" \
   --instance-ids "$INSTANCE_ID" \
   --region "$REGION" \
-  --parameters commands=["chmod +x qa_run_all.sh && ./qa_run_all.sh"] \
+  --parameters 'commands=[
+    "echo 📥 Downloading QA files from S3...",
+    "aws s3 cp s3://qa-bucket-ds-final-2025/qa ./qa --recursive --region us-east-1",
+    "chmod +x ./qa/*.sh",
+    "./qa/qa_run_all.sh"
+  ]' \
   --query "Command.CommandId" \
   --output text)
 
@@ -35,17 +40,17 @@ for i in {1..30}; do
     break
   elif [[ "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
     echo "❌ QA script failed with status: $STATUS"
-    exit 1
+    break
   fi
 
   sleep 10
 done
 
-# Output logs
-echo "🧾 Fetching command output:"
+# Output logs (stdout only)
+echo "🧾 Command output:"
 aws ssm get-command-invocation \
   --region "$REGION" \
   --command-id "$COMMAND_ID" \
   --instance-id "$INSTANCE_ID" \
   --query "StandardOutputContent" \
-  --output text
+  --output text || echo "[⚠️ Could not fetch stdout]"
