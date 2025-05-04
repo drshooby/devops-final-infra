@@ -39,7 +39,8 @@ while IFS=, read -r repo digest; do
     --repository-name "$repo" \
     --image-tag "uat" \
     --image-manifest "$manifest" \
-    --region "$REGION"
+    --region "$REGION" \
+    --output none
   
   echo "✅ Tagged $repo image as 'uat'"
 done < "$INPUT_FILE"
