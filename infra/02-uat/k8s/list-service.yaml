@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: list-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: list-service
+  template:
+    metadata:
+      labels:
+        app: list-service
+    spec:
+      containers:
+      - name: list-service
+        image: id.dkr.ecr.us-east-1.amazonaws.com/list-service:1.1.5-20250502
+        ports:
+        - containerPort: 8001
+        env:
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-connection-secret
+              key: POSTGRES_URL
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: list-service
+spec:
+  selector:
+    app: list-service
+  ports:
+  - port: 8001
+    targetPort: 8001
+  type: ClusterIP

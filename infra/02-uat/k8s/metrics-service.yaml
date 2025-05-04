@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metric-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metric-service
+  template:
+    metadata:
+      labels:
+        app: metric-service
+    spec:
+      containers:
+      - name: metric-service
+        image: id.dkr.ecr.us-east-1.amazonaws.com/metric-service:1.1.5-20250502
+        ports:
+        - containerPort: 8002
+        env:
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-connection-secret
+              key: POSTGRES_URL
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metric-service
+spec:
+  selector:
+    app: metric-service
+  ports:
+  - port: 8002
+    targetPort: 8002
+  type: ClusterIP
