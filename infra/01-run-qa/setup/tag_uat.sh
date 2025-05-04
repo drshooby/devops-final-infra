@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "🏷️ Tagging QA images as UAT..."
 REGION="us-east-1"
-INPUT_FILE="qa_images.txt"
+INPUT_FILE="$(pwd)/qa_images.txt"
 
 # Check if input file exists
 if [ ! -f "$INPUT_FILE" ]; then

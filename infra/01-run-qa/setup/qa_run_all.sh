@@ -52,6 +52,6 @@ echo "✅ QA complete."
 
 # Step 5: Tag images for UAT
 echo "🏷️ Tagging images for UAT..."
-./tag_as_uat.sh
+./tag_uat.sh
 
 echo "🥳 Successfully retagged images for UAT."

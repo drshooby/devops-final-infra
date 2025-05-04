@@ -5,7 +5,7 @@ REPOS=("frontend" "list-service" "metric-service" "email-service")
 ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 REGION="us-east-1"
 ECR_URL="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
-OUTPUT_FILE="qa_images.txt"
+OUTPUT_FILE="$(pwd)/qa_images.txt"
 
 echo "🔑 Logging into ECR..."
 aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ECR_URL"
