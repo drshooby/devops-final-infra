@@ -5,6 +5,7 @@ REPOS=("frontend" "list-service" "metric-service" "email-service")
 ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 REGION="us-east-1"
 ECR_URL="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
+OUTPUT_FILE="qa_images.txt"
 
 echo "🔑 Logging into ECR..."
 aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ECR_URL"
@@ -42,9 +43,11 @@ for repo in "${REPOS[@]}"; do
 
     echo "🏷️ Tagging as $repo for Compose"
     docker tag "$ECR_URL/$repo:$version_tag" "$repo"
+
+    echo "$repo,$qa_digest" >> "$OUTPUT_FILE"
   else
     echo "⚠️ No matching version tag found for QA digest on $repo"
   fi
 done
 
-echo "✅ QA image pull and tagging complete."
+echo "✅ QA image pull and tagging complete. Image information saved to $OUTPUT_FILE"
