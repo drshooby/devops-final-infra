@@ -1,6 +1,6 @@
-# 🛠️ Kubernetes Setup for Shoob Studio App
+# 🛠️ Kubernetes Setup for UAT
 
-This repo contains Kubernetes manifests for deploying the Shoob Studio app into a Kubernetes cluster (UAT or production). It supports a microservice-based architecture using AWS ECR, Secrets Manager, and the External Secrets Operator.
+This repo contains Kubernetes manifests for deploying the app in UAT. It supports a microservice-based architecture using AWS ECR, Secrets Manager, and the External Secrets Operator.
 
 ---
 
