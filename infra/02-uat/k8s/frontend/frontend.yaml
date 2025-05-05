@@ -1,33 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: email-service
+  name: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: email-service
+      app: frontend
   template:
     metadata:
       labels:
-        app: email-service
+        app: frontend
     spec:
       containers:
-      - name: email-service
-        image: id.dkr.ecr.us-east-1.amazonaws.com/email-service:1.1.5-20250502
+      - name: frontend
+        image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${SERVICE}:${IMAGE_TAG}
         ports:
-        - containerPort: 8000
+        - containerPort: 80
       imagePullSecrets:
       - name: regcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: email-service
+  name: frontend
 spec:
   selector:
-    app: email-service
+    app: frontend
   ports:
-  - port: 8000
-    targetPort: 8000
+  - port: 80
+    targetPort: 80
   type: ClusterIP

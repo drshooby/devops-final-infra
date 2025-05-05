@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: email-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: email-service
+  template:
+    metadata:
+      labels:
+        app: email-service
+    spec:
+      containers:
+      - name: email-service
+        image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${SERVICE}:${IMAGE_TAG}
+        ports:
+        - containerPort: 8000
+        env:
+        - name: SMTP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: email-service-secret
+              key: SMTP_HOST
+        - name: SMTP_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: email-service-secret
+              key: SMTP_USERNAME
+        - name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: email-service-secret
+              key: SMTP_PASSWORD
+        - name: FROM_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: email-service-secret
+              key: FROM_EMAIL
+      imagePullSecrets:
+      - name: regcred

@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
       - name: metric-service
-        image: id.dkr.ecr.us-east-1.amazonaws.com/metric-service:1.1.5-20250502
+        image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${SERVICE}:${IMAGE_TAG}
         ports:
         - containerPort: 8002
         env:
         - name: POSTGRES_URL
           valueFrom:
             secretKeyRef:
-              name: db-connection-secret
+              name: metric-service-secret
               key: POSTGRES_URL
       imagePullSecrets:
       - name: regcred

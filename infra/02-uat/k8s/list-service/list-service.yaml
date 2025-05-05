@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
       - name: list-service
-        image: id.dkr.ecr.us-east-1.amazonaws.com/list-service:1.1.5-20250502
+        image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${SERVICE}:${IMAGE_TAG}
         ports:
         - containerPort: 8001
         env:
         - name: POSTGRES_URL
           valueFrom:
             secretKeyRef:
-              name: db-connection-secret
+              name: list-service-secret
               key: POSTGRES_URL
       imagePullSecrets:
       - name: regcred
@@ -37,3 +37,4 @@ spec:
   - port: 8001
     targetPort: 8001
   type: ClusterIP
+  
