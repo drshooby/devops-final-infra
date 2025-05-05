@@ -12,6 +12,9 @@ if [[ -z "$AWS_ACCESS_KEY_ID" || -z "$AWS_SECRET_ACCESS_KEY" ]]; then
   exit 1
 fi
 
+echo "Permissions granted"
+chmod +x ./*.sh
+
 echo "⚙️  Updating kubeconfig..."
 aws eks update-kubeconfig --region us-east-1 --name uat-cluster
 
@@ -38,6 +41,12 @@ helm install external-secrets external-secrets/external-secrets \
     --namespace external-secrets \
     --create-namespace
 
+echo "📦 Installing cert-manager with CRDs..."
+helm upgrade --install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set installCRDs=true
+
 echo "🔐 Creating ECR pull secret (regcred)..."
 ./create_regcred.sh
 
@@ -49,25 +58,31 @@ kubectl wait --namespace external-secrets \
 echo "🔑 Setting up AWS SecretStore (External Secrets)..."
 kubectl apply -f ../k8s/shared/aws-cluster-secret-store.yaml
 
+echo "Setting up ClusterIssuer (SSL)..."
+kubectl apply -f ../k8s/ssl/cluster-issuer.yaml
+
 echo "🔧 Deploying seeder..."
 kubectl create configmap seed-sql --from-file=../k8s/seeder/init.sql --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f "../k8s/seeder/external-secrets.yaml"
 kubectl apply -f "../k8s/seeder/seeder-job.yaml"
 
 echo "🧬 Deploying microservices..."
-./image.sh email-service 1.1.5-20250502
-./image.sh list-service 1.1.5-20250502
-./image.sh metric-service 1.1.5-20250502
-./image.sh frontend 1.1.5-20250502
+./image.sh email-service 1.2.0-20250505
+./image.sh list-service 1.2.0-20250505
+./image.sh metric-service 1.2.0-20250505
+./image.sh frontend 1.2.0-20250505
 
 echo "🌐 Applying ingress for frontend..."
 kubectl apply -f ../k8s/frontend/frontend-ingress.yaml
 
 echo "Wait a couple seconds before checking pod status"
-sleep 2
+sleep 5
 
 echo "🩺 Checking service status..."
 kubectl get pods
 kubectl get ingress
+
+echo "Updating DNS"
+./route53.sh
 
 echo "Done."

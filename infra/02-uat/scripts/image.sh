@@ -41,3 +41,21 @@ else
   echo "❌ Deployment YAML not found: $DEPLOY_YAML"
   exit 1
 fi
+
+echo "🔍 Fetching image digest for $SERVICE..."
+
+REPO_NAME="$SERVICE"
+REGION="us-east-1"
+
+DIGEST=$(aws ecr describe-images \
+  --repository-name "$REPO_NAME" \
+  --query "imageDetails[?contains(imageTags, \`$TAG\`)] | [0].imageDigest" \
+  --output text \
+  --region "$REGION")
+
+if [[ -z "$DIGEST" || "$DIGEST" == "None" ]]; then
+  echo "⚠️ Could not find digest for $SERVICE with tag $TAG"
+else
+  echo "$SERVICE,$DIGEST" >> deployed_images.txt
+  echo "✅ Logged $SERVICE digest as $DIGEST"
+fi
