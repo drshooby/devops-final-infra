@@ -19,44 +19,35 @@ while IFS=, read -r repo digest; do
     echo "⚠️ No digest information for $repo"
     continue
   fi
-  
-  # Check if this digest is already tagged with "uat"
-  existing_tags=$(aws ecr list-images \
-    --repository-name "$repo" \
-    --filter "tagStatus=TAGGED" \
-    --query "imageIds[?imageDigest=='$digest'].imageTag" \
-    --output json \
-    --region "$REGION")
-  
-  # Check if "uat" is already in the tags list
-  if echo "$existing_tags" | grep -q "uat"; then
-    echo "✅ Image $repo with digest $digest is already tagged as 'uat' - skipping"
-    continue
-  fi
-  
-  echo "🏷️ Image needs UAT tag - proceeding..."
-  
-  # Get the image manifest for that digest
+
+  # Get the image manifest
   manifest=$(aws ecr batch-get-image \
     --repository-name "$repo" \
     --image-ids imageDigest="$digest" \
     --region "$REGION" \
     --query "images[0].imageManifest" \
     --output text)
-  
+
   if [ -z "$manifest" ] || [ "$manifest" == "None" ]; then
     echo "❌ Failed to get manifest for $repo with digest $digest"
     continue
   fi
-  
-  # Tag the image with "uat"
+
+  # Delete existing "uat" tag if present
+  echo "🧨 Deleting existing 'uat' tag (if present) for $repo..."
+  aws ecr batch-delete-image \
+    --repository-name "$repo" \
+    --image-ids imageTag="uat" \
+    --region "$REGION" || true
+
+  # Put new "uat" tag
   echo "🏷️ Tagging $repo digest $digest as 'uat'..."
   aws ecr put-image \
     --repository-name "$repo" \
     --image-tag "uat" \
     --image-manifest "$manifest" \
     --region "$REGION"
-  
+
   echo "✅ Tagged $repo image as 'uat'"
 done < "$INPUT_FILE"
 
