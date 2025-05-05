@@ -7,47 +7,52 @@ REGION="us-east-1"
 ECR_URL="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
 OUTPUT_FILE="$(pwd)/qa_images.txt"
 
+# Clear the output file
+> "$OUTPUT_FILE"
+
 echo "🔑 Logging into ECR..."
 aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ECR_URL"
 
 for repo in "${REPOS[@]}"; do
-  echo "🔍 Resolving QA tag digest for $repo..."
+  echo "🔍 Finding latest QA tagged image for $repo..."
 
-  qa_digest=$(aws ecr list-images \
+  # Get all images with the qa tag and sort by pushed date to find the latest one
+  latest_qa_image=$(aws ecr describe-images \
     --repository-name "$repo" \
-    --filter tagStatus=TAGGED \
-    --region "$REGION" \
-    --query "imageIds[?imageTag=='qa'].imageDigest" \
-    --output text)
-
-  if [ -z "$qa_digest" ]; then
-    echo "⚠️ QA tag not found for $repo"
+    --filter "tagStatus=TAGGED" \
+    --query "sort_by(imageDetails[?contains(imageTags, 'qa')], &imagePushedAt)[-1:].{digest:imageDigest,tags:imageTags,pushed:imagePushedAt}" \
+    --output json \
+    --region "$REGION" 2>/dev/null || echo "[]")
+  
+  # Check if we got any results
+  if [ "$latest_qa_image" == "[]" ] || [ -z "$latest_qa_image" ]; then
+    echo "⚠️ No QA tagged images found for $repo"
+    continue
+  fi
+  
+  # Extract the digest of the latest qa-tagged image
+  qa_digest=$(echo "$latest_qa_image" | jq -r '.[0].digest // empty')
+  pushed_date=$(echo "$latest_qa_image" | jq -r '.[0].pushed // "unknown"')
+  all_tags=$(echo "$latest_qa_image" | jq -r '.[0].tags | join(", ") // "unknown"')
+  
+  if [ -z "$qa_digest" ] || [ "$qa_digest" == "null" ]; then
+    echo "⚠️ Could not extract digest for latest QA image of $repo"
     continue
   fi
 
-  echo "🔍 Finding matching version tag with digest $qa_digest..."
+  echo "🔹 Found latest QA image for $repo:"
+  echo "   Digest: $qa_digest"
+  echo "   Pushed: $pushed_date" 
+  echo "   Tags: $all_tags"
 
-  version_tag=$(aws ecr list-images \
-    --repository-name "$repo" \
-    --filter tagStatus=TAGGED \
-    --region "$REGION" \
-    --query 'imageIds[].[imageTag, imageDigest]' \
-    --output text | \
-    awk -v digest="$qa_digest" '$2 == digest && $1 ~ /^[0-9]+\.[0-9]+\.[0-9]+-[0-9]{8}$/ { print $1 }' | \
-    sort -Vr | \
-    head -n 1)
+  echo "🚀 Pulling $repo:qa (digest: $qa_digest)"
+  docker pull "$ECR_URL/$repo:qa"
 
-  if [ -n "$version_tag" ]; then
-    echo "🚀 Pulling $repo:$version_tag"
-    docker pull "$ECR_URL/$repo:$version_tag"
+  echo "🏷️ Tagging as $repo for Compose"
+  docker tag "$ECR_URL/$repo:qa" "$repo"
 
-    echo "🏷️ Tagging as $repo for Compose"
-    docker tag "$ECR_URL/$repo:$version_tag" "$repo"
-
-    echo "$repo,$qa_digest" >> "$OUTPUT_FILE"
-  else
-    echo "⚠️ No matching version tag found for QA digest on $repo"
-  fi
+  # Write the repo and digest to the output file
+  echo "$repo,$qa_digest" >> "$OUTPUT_FILE"
 done
 
 echo "✅ QA image pull and tagging complete. Image information saved to $OUTPUT_FILE"

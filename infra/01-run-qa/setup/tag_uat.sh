@@ -15,10 +15,26 @@ fi
 while IFS=, read -r repo digest; do
   echo "🔍 Processing $repo with digest $digest..."
   
-  if [ -z "$digest" ]; then
+  if [ -z "$digest" ] || [ "$digest" == "None" ]; then
     echo "⚠️ No digest information for $repo"
     continue
   fi
+  
+  # Check if this digest is already tagged with "uat"
+  existing_tags=$(aws ecr list-images \
+    --repository-name "$repo" \
+    --filter "tagStatus=TAGGED" \
+    --query "imageIds[?imageDigest=='$digest'].imageTag" \
+    --output json \
+    --region "$REGION")
+  
+  # Check if "uat" is already in the tags list
+  if echo "$existing_tags" | grep -q "uat"; then
+    echo "✅ Image $repo with digest $digest is already tagged as 'uat' - skipping"
+    continue
+  fi
+  
+  echo "🏷️ Image needs UAT tag - proceeding..."
   
   # Get the image manifest for that digest
   manifest=$(aws ecr batch-get-image \
@@ -29,7 +45,7 @@ while IFS=, read -r repo digest; do
     --output text)
   
   if [ -z "$manifest" ] || [ "$manifest" == "None" ]; then
-    echo "❌ Failed to get manifest for $repo"
+    echo "❌ Failed to get manifest for $repo with digest $digest"
     continue
   fi
   
@@ -39,8 +55,7 @@ while IFS=, read -r repo digest; do
     --repository-name "$repo" \
     --image-tag "uat" \
     --image-manifest "$manifest" \
-    --region "$REGION" \
-    --output none
+    --region "$REGION"
   
   echo "✅ Tagged $repo image as 'uat'"
 done < "$INPUT_FILE"
