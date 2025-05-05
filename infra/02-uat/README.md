@@ -78,6 +78,19 @@ Example:
 
 - Your `frontend/frontend-ingress.yaml` exposes the app at: `http://uat.shoob.studio`
 
+
+```bash
+### Set up the ingress controller if you haven't already
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --create-namespace
+### And confirm it's up
+kubectl get pods -n ingress-nginx
+```
+
 Make sure:
 
 - You have an Ingress controller installed (NGINX)
