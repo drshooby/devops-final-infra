@@ -11,10 +11,9 @@ fi
 SERVICE=$1
 TAG=$2
 
-echo "🔍 Getting AWS Account ID..."
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
-echo "🚀 Deploying $SERVICE with tag $TAG from account $AWS_ACCOUNT_ID"
+echo "🚀 Deploying $SERVICE with tag $TAG"
 
 # Export only the vars we want to substitute
 export SERVICE

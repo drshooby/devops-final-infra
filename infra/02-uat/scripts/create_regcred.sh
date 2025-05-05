@@ -18,7 +18,7 @@ fi
 echo "🧼 Cleaning up old secret if exists..."
 kubectl delete secret "$SECRET_NAME" --namespace "$NAMESPACE" --ignore-not-found
 
-echo "📦 Creating new regcred secret for $REGISTRY"
+echo "📦 Creating new regcred secret"
 kubectl create secret docker-registry "$SECRET_NAME" \
   --docker-server="$REGISTRY" \
   --docker-username=AWS \

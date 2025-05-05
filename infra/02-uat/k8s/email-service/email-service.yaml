@@ -40,3 +40,15 @@ spec:
               key: FROM_EMAIL
       imagePullSecrets:
       - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: email-service
+spec:
+  selector:
+    app: email-service
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP

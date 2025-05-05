@@ -1,3 +1,23 @@
+resource "aws_security_group" "rds_access" {
+  name        = "rds-access-from-eks"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description      = "Postgres from EKS"
+    from_port        = 5432
+    to_port          = 5432
+    protocol         = "tcp"
+    security_groups  = [module.eks.node_security_group_id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 module "db" {
   source = "terraform-aws-modules/rds/aws"
 
@@ -10,24 +30,22 @@ module "db" {
 
   db_name  = "uatdb"
   username = "dbmaster"
+  manage_master_user_password	= false
   password = var.db_password
   port     = "5432"
 
   iam_database_authentication_enabled = true
 
   vpc_security_group_ids = [
-    module.vpc.default_security_group_id,
-    aws_security_group.rds_ingress_from_my_ip.id
+    aws_security_group.rds_access.id
   ]
 
   availability_zone = var.db_az
 
   tags = var.tags
 
-  # DB subnet group
   create_db_subnet_group = true
-  # THIS IS FOR DEV DO NOT PUT THE DB IN A PUBLIC SUBNET!!!
-  subnet_ids             = module.vpc.public_subnets
+  subnet_ids             = module.vpc.private_subnets
 
   # DB parameter group
   family = "postgres17"
