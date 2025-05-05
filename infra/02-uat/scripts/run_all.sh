@@ -85,4 +85,4 @@ kubectl get ingress
 echo "Updating DNS"
 ./route53.sh
 
-echo "Done."
+echo "Run all complete."
