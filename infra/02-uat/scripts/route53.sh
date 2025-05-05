@@ -60,6 +60,7 @@ for i in {1..30}; do
 
   if [[ -n "$RESOLVED" ]]; then
     echo "🎉 DNS is synced"
+    echo "📜 The SSL certificate may still be propagating. HTTPS should become valid shortly."
     exit 0
   fi
 
