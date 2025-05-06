@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: metric-service
+spec:
+  replicas: 1
+  strategy:
+    blueGreen:
+      activeService: metric-service
+      previewService: metric-service-preview
+      autoPromotionEnabled: false
+  selector:
+    matchLabels:
+      app: metric-service
+  template:
+    metadata:
+      labels:
+        app: metric-service
+    spec:
+      containers:
+      - name: metric-service
+        image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${SERVICE}:${IMAGE_TAG}
+        ports:
+        - containerPort: 8002
+        env:
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: metric-service-secret
+              key: POSTGRES_URL
+      imagePullSecrets:
+      - name: regcred

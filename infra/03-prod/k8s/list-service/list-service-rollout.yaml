@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: list-service
+spec:
+  replicas: 1
+  strategy:
+    blueGreen:
+      activeService: list-service
+      previewService: list-service-preview
+      autoPromotionEnabled: false
+  selector:
+    matchLabels:
+      app: list-service
+  template:
+    metadata:
+      labels:
+        app: list-service
+    spec:
+      containers:
+      - name: list-service
+        image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${SERVICE}:${IMAGE_TAG}
+        ports:
+        - containerPort: 8001
+        env:
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: list-service-secret
+              key: POSTGRES_URL
+      imagePullSecrets:
+      - name: regcred

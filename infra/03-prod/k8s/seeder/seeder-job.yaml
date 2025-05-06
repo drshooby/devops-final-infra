@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-seeder
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+      - name: seeder
+        image: postgres:17
+        env:
+        - name: POSTGRES_CLI_URL
+          valueFrom:
+            secretKeyRef:
+              name: seeder-secret
+              key: POSTGRES_CLI_URL
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "🌱 Seeding database..."
+          echo "$POSTGRES_CLI_URL" > /tmp/conn.txt
+          psql -v ON_ERROR_STOP=1 "$POSTGRES_CLI_URL" -f /seed/init.sql
+          echo "✅ Done seeding"
+        volumeMounts:
+        - name: seed-volume
+          mountPath: /seed
+      restartPolicy: Never
+      volumes:
+      - name: seed-volume
+        configMap:
+          name: seed-sql
