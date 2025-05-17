@@ -27,7 +27,7 @@ COMMAND_ID=$(aws ssm send-command \
 echo " Sent command: $COMMAND_ID"
 
 # Wait for command to complete
-echo "⏳ Waiting for command to finish..."
+echo " Waiting for command to finish..."
 for i in {1..30}; do
   STATUS=$(aws ssm list-command-invocations \
     --region "$REGION" \
@@ -36,7 +36,7 @@ for i in {1..30}; do
     --query "CommandInvocations[0].Status" \
     --output text 2>/dev/null || echo "Pending")
 
-  echo "⌛ Status: $STATUS"
+  echo " Status: $STATUS"
   if [[ "$STATUS" == "Success" ]]; then
     echo " QA script completed successfully!"
     break

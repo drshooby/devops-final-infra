@@ -37,7 +37,7 @@ echo " Spinning up QA environment..."
 ./compose.sh
 
 # Step 3: Wait for services to settle
-echo "⏳ Waiting for containers to initialize..."
+echo " Waiting for containers to initialize..."
 sleep 10
 
 # Step 3b:

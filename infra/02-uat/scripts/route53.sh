@@ -15,7 +15,7 @@ for i in {1..30}; do
     break
   fi
 
-  echo "⏳ ELB not ready yet... retrying ($i/30)"
+  echo " ELB not ready yet... retrying ($i/30)"
   sleep 3
 done
 
@@ -53,7 +53,7 @@ aws route53 change-resource-record-sets \
 
 echo " Route 53 CNAME updated: $RECORD_NAME → $ELB_HOST"
 
-echo "⏳ Waiting for DNS to reflect the update..."
+echo " Waiting for DNS to reflect the update..."
 
 for i in {1..30}; do
   RESOLVED=$(dig +short "$RECORD_NAME" | grep "$ELB_HOST" || true)

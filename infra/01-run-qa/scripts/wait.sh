@@ -19,7 +19,7 @@ while true; do
     exit 0
   fi
 
-  echo "⏳ Attempt $attempt: SSM status: $STATUS. Waiting 7s..."
+  echo " Attempt $attempt: SSM status: $STATUS. Waiting 7s..."
   sleep 7
   ((attempt++))
 done

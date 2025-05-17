@@ -27,7 +27,7 @@ if [[ -f "$SECRET_YAML" ]]; then
   echo " Applying ExternalSecret for $SERVICE..."
   kubectl apply -f "$SECRET_YAML"
 else
-  echo "ℹ No external-secrets.yaml for $SERVICE. Skipping secrets..."
+  echo " No external-secrets.yaml for $SERVICE. Skipping secrets..."
 fi
 
 # Special case: frontend does NOT use Argo Rollouts
@@ -43,7 +43,7 @@ CURRENT_IMAGE=$(kubectl get rollout "$SERVICE" -o jsonpath='{.spec.template.spec
 NEW_IMAGE="${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${SERVICE}:${IMAGE_TAG}"
 
 if [[ "$CURRENT_IMAGE" == "$NEW_IMAGE" ]]; then
-  echo "⏩ $SERVICE is already running image $IMAGE_TAG — skipping rollout"
+  echo " $SERVICE is already running image $IMAGE_TAG — skipping rollout"
   exit 0
 fi
 

@@ -30,7 +30,7 @@ if [[ -f "$SECRET_YAML" ]]; then
   echo " Applying ExternalSecret for $SERVICE..."
   kubectl apply -f "$SECRET_YAML"
 else
-  echo "ℹ No external-secrets.yaml found for $SERVICE. Skipping secret setup."
+  echo " No external-secrets.yaml found for $SERVICE. Skipping secret setup."
 fi
 
 # Deploy the service
