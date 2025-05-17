@@ -10,11 +10,11 @@ OUTPUT_FILE="$(pwd)/qa_images.txt"
 # Clear the output file
 > "$OUTPUT_FILE"
 
-echo "🔑 Logging into ECR..."
+echo " Logging into ECR..."
 aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ECR_URL"
 
 for repo in "${REPOS[@]}"; do
-  echo "🔍 Finding latest QA tagged image for $repo..."
+  echo " Finding latest QA tagged image for $repo..."
 
   # Get all images with the qa tag and sort by pushed date to find the latest one
   latest_qa_image=$(aws ecr describe-images \
@@ -26,7 +26,7 @@ for repo in "${REPOS[@]}"; do
   
   # Check if we got any results
   if [ "$latest_qa_image" == "[]" ] || [ -z "$latest_qa_image" ]; then
-    echo "⚠️ No QA tagged images found for $repo"
+    echo " No QA tagged images found for $repo"
     continue
   fi
   
@@ -36,23 +36,23 @@ for repo in "${REPOS[@]}"; do
   all_tags=$(echo "$latest_qa_image" | jq -r '.[0].tags | join(", ") // "unknown"')
   
   if [ -z "$qa_digest" ] || [ "$qa_digest" == "null" ]; then
-    echo "⚠️ Could not extract digest for latest QA image of $repo"
+    echo " Could not extract digest for latest QA image of $repo"
     continue
   fi
 
-  echo "🔹 Found latest QA image for $repo:"
+  echo " Found latest QA image for $repo:"
   echo "   Digest: $qa_digest"
   echo "   Pushed: $pushed_date" 
   echo "   Tags: $all_tags"
 
-  echo "🚀 Pulling $repo:qa (digest: $qa_digest)"
+  echo " Pulling $repo:qa (digest: $qa_digest)"
   docker pull "$ECR_URL/$repo:qa"
 
-  echo "🏷️ Tagging as $repo for Compose"
+  echo " Tagging as $repo for Compose"
   docker tag "$ECR_URL/$repo:qa" "$repo"
 
   # Write the repo and digest to the output file
   echo "$repo,$qa_digest" >> "$OUTPUT_FILE"
 done
 
-echo "✅ QA image pull and tagging complete. Image information saved to $OUTPUT_FILE"
+echo " QA image pull and tagging complete. Image information saved to $OUTPUT_FILE"

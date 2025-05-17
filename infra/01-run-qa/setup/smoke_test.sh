@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-echo "🧪 Running smoke tests..."
-echo "🔍 Checking service health endpoints..."
+echo " Running smoke tests..."
+echo " Checking service health endpoints..."
 
 check_service() {
   local name=$1
@@ -12,9 +12,9 @@ check_service() {
 
   response=$(curl -fs "$url" || true)
   if [[ "$response" == *"$expected"* ]]; then
-    echo "✅ $name is up"
+    echo " $name is up"
   else
-    echo "❌ $name failed"
+    echo " $name failed"
     echo "$response"
     exit 1
   fi
@@ -25,4 +25,4 @@ check_service "list-service"   "http://localhost:8001/api/list/health"   "Hello"
 check_service "metric-service" "http://localhost:8002/api/metrics/health" "Hello"
 check_service "web"            "http://localhost:8080"                   "<title>Photo App</title>"
 
-echo "✅ Smoke tests complete."
+echo " Smoke tests complete."

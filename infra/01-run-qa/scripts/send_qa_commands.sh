@@ -5,7 +5,7 @@ set -euo pipefail
 INSTANCE_ID="$1"
 REGION="us-east-1"
 
-echo "🚀 Sending SSM command to start QA script on instance $INSTANCE_ID..."
+echo " Sending SSM command to start QA script on instance $INSTANCE_ID..."
 
 # Send the command and capture Command ID
 COMMAND_ID=$(aws ssm send-command \
@@ -14,7 +14,7 @@ COMMAND_ID=$(aws ssm send-command \
   --instance-ids "$INSTANCE_ID" \
   --region "$REGION" \
   --parameters 'commands=[
-    "echo 📥 Downloading QA files from S3...",
+    "echo  Downloading QA files from S3...",
     "export PATH=/home/ssm-user/.docker/cli-plugins:$PATH",
     "yum install jq",
     "aws s3 cp s3://qa-bucket-ds-final-2025/qa ./qa --recursive --region us-east-1",
@@ -24,7 +24,7 @@ COMMAND_ID=$(aws ssm send-command \
   --query "Command.CommandId" \
   --output text)
 
-echo "📡 Sent command: $COMMAND_ID"
+echo " Sent command: $COMMAND_ID"
 
 # Wait for command to complete
 echo "⏳ Waiting for command to finish..."
@@ -38,10 +38,10 @@ for i in {1..30}; do
 
   echo "⌛ Status: $STATUS"
   if [[ "$STATUS" == "Success" ]]; then
-    echo "✅ QA script completed successfully!"
+    echo " QA script completed successfully!"
     break
   elif [[ "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
-    echo "❌ QA script failed with status: $STATUS"
+    echo " QA script failed with status: $STATUS"
     break
   fi
 
@@ -49,10 +49,10 @@ for i in {1..30}; do
 done
 
 # Output logs (stdout only)
-echo "🧾 Command output:"
+echo " Command output:"
 aws ssm get-command-invocation \
   --region "$REGION" \
   --command-id "$COMMAND_ID" \
   --instance-id "$INSTANCE_ID" \
   --query "StandardOutputContent" \
-  --output text || echo "[⚠️ Could not fetch stdout]"
+  --output text || echo "[ Could not fetch stdout]"

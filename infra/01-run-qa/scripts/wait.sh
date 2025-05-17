@@ -5,7 +5,7 @@ set -euo pipefail
 INSTANCE_ID="$1"
 REGION="us-east-1"
 
-echo "🔄 Waiting for EC2 instance $INSTANCE_ID to become SSM-managed..."
+echo " Waiting for EC2 instance $INSTANCE_ID to become SSM-managed..."
 
 attempt=1
 while true; do
@@ -15,7 +15,7 @@ while true; do
     --output text 2>/dev/null || echo "none")
 
   if [[ "$STATUS" == "Online" ]]; then
-    echo "✅ Instance $INSTANCE_ID is online in SSM and ready."
+    echo " Instance $INSTANCE_ID is online in SSM and ready."
     exit 0
   fi
 

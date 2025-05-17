@@ -4,7 +4,7 @@ set -euo pipefail
 # Usage: ./image.sh SERVICE_NAME VERSION_TAG
 
 if [[ $# -ne 2 ]]; then
-  echo "❌ Usage: $0 SERVICE_NAME VERSION_TAG"
+  echo " Usage: $0 SERVICE_NAME VERSION_TAG"
   exit 1
 fi
 
@@ -24,17 +24,17 @@ SECRET_YAML="$SERVICE_DIR/external-secrets.yaml"
 
 # Apply secrets if needed
 if [[ -f "$SECRET_YAML" ]]; then
-  echo "🔐 Applying ExternalSecret for $SERVICE..."
+  echo " Applying ExternalSecret for $SERVICE..."
   kubectl apply -f "$SECRET_YAML"
 else
-  echo "ℹ️ No external-secrets.yaml for $SERVICE. Skipping secrets..."
+  echo "ℹ No external-secrets.yaml for $SERVICE. Skipping secrets..."
 fi
 
 # Special case: frontend does NOT use Argo Rollouts
 if [[ "$SERVICE" == "frontend" ]]; then
-  echo "📦 Applying regular Deployment for $SERVICE..."
+  echo " Applying regular Deployment for $SERVICE..."
   envsubst '${AWS_ACCOUNT_ID} ${SERVICE} ${IMAGE_TAG}' < "$SERVICE_YAML" | kubectl apply -f -
-  echo "✅ $SERVICE deployed with tag: $TAG (non-rollout)"
+  echo " $SERVICE deployed with tag: $TAG (non-rollout)"
   exit 0
 fi
 
@@ -49,15 +49,15 @@ fi
 
 # Apply rollout and services
 if [[ -f "$ROLLOUT_YAML" ]]; then
-  echo "🌀 Applying Argo Rollout for $SERVICE..."
+  echo " Applying Argo Rollout for $SERVICE..."
   envsubst '${AWS_ACCOUNT_ID} ${SERVICE} ${IMAGE_TAG}' < "$ROLLOUT_YAML" | kubectl apply -f -
 else
-  echo "❌ Rollout YAML not found for $SERVICE!"
+  echo " Rollout YAML not found for $SERVICE!"
   exit 1
 fi
 
-echo "🔧 Applying active and preview services for $SERVICE..."
+echo " Applying active and preview services for $SERVICE..."
 kubectl apply -f "$SERVICE_YAML"
 kubectl apply -f "$PREVIEW_YAML"
 
-echo "✅ $SERVICE rollout applied with tag: $TAG"
+echo " $SERVICE rollout applied with tag: $TAG"

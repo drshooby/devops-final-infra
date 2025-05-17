@@ -18,10 +18,10 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          echo "🌱 Seeding database..."
+          echo " Seeding database..."
           echo "$POSTGRES_CLI_URL" > /tmp/conn.txt
           psql -v ON_ERROR_STOP=1 "$POSTGRES_CLI_URL" -f /seed/init.sql
-          echo "✅ Done seeding"
+          echo " Done seeding"
         volumeMounts:
         - name: seed-volume
           mountPath: /seed
